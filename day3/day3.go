@@ -56,10 +56,11 @@ func Part2(lines []string) int {
 	for _, claim := range claims {
 		for x := 0; x < claim.width; x++ {
 			for y := 0; y < claim.height; y++ {
-				overlapping[x+claim.offsetX][y+claim.offsetY] = append(overlapping[x+claim.offsetX][y+claim.offsetY], claim.id)
+				cur := &overlapping[x+claim.offsetX][y+claim.offsetY]
+				*cur = append(*cur, claim.id)
 
-				if len(overlapping[x+claim.offsetX][y+claim.offsetY]) > 1 {
-					for _, id := range overlapping[x+claim.offsetX][y+claim.offsetY] {
+				if len(*cur) > 1 {
+					for _, id := range *cur {
 						hasOverlap[id] = true
 					}
 				}
