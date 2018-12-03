@@ -17,7 +17,7 @@ func main() {
 	lines := util.ReadLines()
 
 	fmt.Printf("Part 1: %v\n", Part1(lines))
-	// fmt.Printf("Part 2: %v\n", Part2(lines))
+	fmt.Printf("Part 2: %v\n", Part2(lines))
 }
 
 func Part1(lines []string) int {
@@ -44,6 +44,36 @@ func Part1(lines []string) int {
 	}
 
 	return sum
+}
+
+func Part2(lines []string) int {
+	// Turn input into the form of claims
+	claims := createClaimsSlice(lines)
+	overlapping := [1000][1000][]int{}
+	hasOverlap := make([]bool, len(lines)+1)
+	hasOverlap[0] = true // No claim has id 0
+
+	for _, claim := range claims {
+		for x := 0; x < claim.width; x++ {
+			for y := 0; y < claim.height; y++ {
+				overlapping[x+claim.offsetX][y+claim.offsetY] = append(overlapping[x+claim.offsetX][y+claim.offsetY], claim.id)
+
+				if len(overlapping[x+claim.offsetX][y+claim.offsetY]) > 1 {
+					for _, id := range overlapping[x+claim.offsetX][y+claim.offsetY] {
+						hasOverlap[id] = true
+					}
+				}
+			}
+		}
+	}
+
+	for id, overlaps := range hasOverlap {
+		if !overlaps {
+			return id
+		}
+	}
+
+	return 0
 }
 
 func createClaimsSlice(lines []string) []claim {
