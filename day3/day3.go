@@ -77,6 +77,39 @@ func Part2(lines []string) int {
 	return 0
 }
 
+// This solution builds directly on the solution for part 1
+// which is probably a quicker way of solving
+func Part2_alt(lines []string) int {
+	// Turn input into the form of claims
+	claims := createClaimsSlice(lines)
+	overlapping := [1000][1000][]int{}
+
+	for _, claim := range claims {
+		for x := 0; x < claim.width; x++ {
+			for y := 0; y < claim.height; y++ {
+				cur := &overlapping[x+claim.offsetX][y+claim.offsetY]
+				*cur = append(*cur, claim.id)
+			}
+		}
+	}
+
+	for _, claim := range claims {
+		solo := true
+		for x := 0; x < len(overlapping); x++ {
+			for y := 0; y < len(overlapping[0]); y++ {
+				if len(overlapping[x][y]) > 1 {
+					solo = false
+				}
+			}
+		}
+		if solo {
+			return claim.id
+		}
+	}
+
+	return 0
+}
+
 func createClaimsSlice(lines []string) []claim {
 	var claims []claim
 	for _, line := range lines {
