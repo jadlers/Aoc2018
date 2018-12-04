@@ -16,12 +16,13 @@ type Note struct {
 func main() {
 	lines := util.ReadLines()
 
-	fmt.Printf("Part1: %v\n", Part1(lines))
-	// fmt.Printf("Part2: %v\n", Part2(lines))
+	ansP1, ansP2 := Exec(lines)
+	fmt.Printf("Part1: %v\n", ansP1)
+	fmt.Printf("Part2: %v\n", ansP2)
 }
 
 // [1518-08-30 00:03] Guard #1307 begins shift
-func Part1(lines []string) int {
+func Exec(lines []string) (ansP1, ansP2 int) {
 	var notes []Note
 	for _, line := range lines {
 		split := strings.Split(line, "]")
@@ -33,39 +34,30 @@ func Part1(lines []string) int {
 		notes = append(notes, newNote)
 	}
 
-	sleepData := make(map[int][60]int)
+	sleepData := make(map[int][]int)
 	totalSleep := map[int]int{}
-	var currGuard = -1
-	// for _, note := range notes {
+	var currGuard int
 	for i := 0; i < len(notes); i++ {
-		// fmt.Println(notes[i])
 		if strings.Contains(notes[i].rest, "Guard") {
-			// fmt.Printf("Notes for %v, is %v\n", i, notes[i].rest)
 			currGuard = getGuardId(notes[i].rest)
+			if len(sleepData[currGuard]) == 0 { // Initialise slice
+				sleepData[currGuard] = make([]int, 60)
+			}
 		} else if strings.Contains(notes[i].rest, "falls") {
+			// Assuming every "falls asleep" is followed by a "wakes up"
 			sleepTime := notes[i+1].time - notes[i].time
 			totalSleep[currGuard] += sleepTime
 			for j := notes[i].time; j < notes[i+1].time; j++ {
-				currSleepData := sleepData[currGuard]
-				currSleepData[j] += 1
-				sleepData[currGuard] = currSleepData
+				sleepData[currGuard][j] += 1
 			}
 		}
-
 	}
 
-	// Find guard with most sleep
-	mostSleepingGuard := -1
-	mostSleepingGuardTime := -1
-	for guard, totalSleepTime := range totalSleep {
-		if totalSleepTime > mostSleepingGuardTime {
-			mostSleepingGuard = guard
-			mostSleepingGuardTime = totalSleepTime
-		}
-	}
+	mostSleepingGuard, _ := getMostSleepingGuard(totalSleep)
+	mostSleepingGuardMinute, _ := getMostFrequentMinute(sleepData[mostSleepingGuard])
+	ansP1 = mostSleepingGuard * mostSleepingGuardMinute
 
-	fmt.Println(mostSleepingGuard)
-
+	// PART 2
 	// Gather data on each guard for the minute they sleep the most
 	type frq struct {
 		min        int
@@ -87,12 +79,24 @@ func Part1(lines []string) int {
 		}
 	}
 
-	fmt.Println(freqGuardSleep)
-
-	return resGuard * resMinute
+	ansP2 = resGuard * resMinute
+	return
 }
 
-func getMostFrequentMinute(minutes [60]int) (minute, occurances int) {
+func getMostSleepingGuard(totalSleep map[int]int) (guard, minutes int) {
+	// Find guard with most sleep
+	guard = -1
+	minutes = -1
+	for g, totalSleepTime := range totalSleep {
+		if totalSleepTime > minutes {
+			guard = g
+			minutes = totalSleepTime
+		}
+	}
+	return
+}
+
+func getMostFrequentMinute(minutes []int) (minute, occurances int) {
 	minute = 0
 	occurances = 0
 
