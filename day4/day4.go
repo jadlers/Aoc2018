@@ -64,21 +64,45 @@ func Part1(lines []string) int {
 		}
 	}
 
-	// Find the time that guard slept most often
-	maxData := struct {
+	fmt.Println(mostSleepingGuard)
+
+	// Gather data on each guard for the minute they sleep the most
+	type frq struct {
 		min        int
 		occurances int
-	}{-1, -1}
-
-	for min, occurances := range sleepData[mostSleepingGuard] {
-		if occurances > maxData.occurances {
-			maxData.min = min
-			maxData.occurances = occurances
-		}
-
+	}
+	freqGuardSleep := map[int]frq{}
+	for guard, minutes := range sleepData {
+		min, occurances := getMostFrequentMinute(minutes)
+		freqGuardSleep[guard] = frq{min, occurances}
 	}
 
-	return mostSleepingGuard * maxData.min
+	// map[10:{24 2} 99:{45 3}]
+	resGuard, resMinute, mostOccurances := -1, -1, -1
+	for guard, frequency := range freqGuardSleep {
+		if frequency.occurances > mostOccurances {
+			resGuard = guard
+			resMinute = frequency.min
+			mostOccurances = frequency.occurances
+		}
+	}
+
+	fmt.Println(freqGuardSleep)
+
+	return resGuard * resMinute
+}
+
+func getMostFrequentMinute(minutes [60]int) (minute, occurances int) {
+	minute = 0
+	occurances = 0
+
+	for min, occ := range minutes {
+		if occ > occurances {
+			minute = min
+			occurances = occ
+		}
+	}
+	return
 }
 
 func getGuardId(str string) int {
