@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	util "github.com/jadlers/AoC2018/util"
+	util "github.com/jadlers/advent-of-code/util"
 	"strings"
 )
 
