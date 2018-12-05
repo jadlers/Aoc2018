@@ -15,19 +15,40 @@ func main() {
 }
 
 func Day5(input string) (p1, p2 int) {
-	var res string = input
-	var removed int
-	for {
-		res, removed = removeReacting(res)
-		if removed == 0 {
-			break
+	res := fullyReact(input)
+	p1 = len(res)
+
+	// Part 2
+	alphabet := strings.Split("abcdefghijklmnopqrstuvxyz", "")
+
+	finalLengths := map[string]int{}
+	for _, letter := range alphabet {
+		r := strings.NewReplacer(letter, "", strings.ToUpper(letter), "")
+		curr := r.Replace(input)
+		if len(curr) < len(input) {
+			currReacted := fullyReact(curr)
+			finalLengths[letter] = len(currReacted)
 		}
 	}
 
-	p1 = len(res)
+	p2 = len(input)
+	for _, val := range finalLengths {
+		if val < p2 {
+			p2 = val
+		}
+	}
 
-	p2 = 0
 	return
+}
+
+func fullyReact(str string) string {
+	var removed int
+	for {
+		str, removed = removeReacting(str)
+		if removed == 0 {
+			return str
+		}
+	}
 }
 
 func removeReacting(polymer string) (remainder string, removed int) {

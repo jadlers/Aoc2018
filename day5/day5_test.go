@@ -14,7 +14,7 @@ func TestDay5(t *testing.T) {
 		wantP1 int
 		wantP2 int
 	}{
-		{"Example", args{"dabAcCaCBAcCcaDA"}, 10, 0},
+		{"Example", args{"dabAcCaCBAcCcaDA"}, 10, 4},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
