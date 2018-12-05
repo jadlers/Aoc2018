@@ -4,6 +4,8 @@ import (
 	"bufio"
 	"os"
 	"strconv"
+	"strings"
+	"unicode"
 )
 
 func ReadLines() []string {
@@ -22,4 +24,16 @@ func StringSliceToInt(from []string) []int {
 		to[i] = integer
 	}
 	return to
+}
+
+func TrimAllWhitespace(str string) string {
+	// Taken from: https://stackoverflow.com/a/32081891
+	var b strings.Builder
+	b.Grow(len(str))
+	for _, ch := range str {
+		if !unicode.IsSpace(ch) {
+			b.WriteRune(ch)
+		}
+	}
+	return b.String()
 }
