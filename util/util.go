@@ -37,3 +37,10 @@ func TrimAllWhitespace(str string) string {
 	}
 	return b.String()
 }
+
+func AbsInt(no int) int {
+	if no < 0 {
+		return -no
+	}
+	return no
+}
