@@ -23,20 +23,27 @@ func Day6(input string) (p1, p2 int) {
 		banks = append(banks, i)
 	}
 
-	seen := map[string]bool{fmt.Sprintf("%v", banks): true}
+	// seen key: [occurances, lastIdx]
+	seen := map[string][]int{fmt.Sprintf("%v", banks): []int{1, 0}}
 	for {
 		nextBlocks := Redistribute(banks)
 		key := fmt.Sprintf("%v", nextBlocks)
 		// fmt.Printf("key: %v, seen: %v\n", key, seen)
-		if seen[key] {
+		if seen[key] != nil && seen[key][0] > 1 {
+			p2 = p1 - seen[key][1]
 			p1++
 			break
 		}
-		seen[key] = true
+
+		if seen[key] == nil {
+			seen[key] = []int{1, p1}
+		} else {
+			oldVal := seen[key][0]
+			seen[key] = []int{oldVal + 1, p1}
+		}
 		p1++
 	}
 
-	p2 = 0
 	return
 }
 
