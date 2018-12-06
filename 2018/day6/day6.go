@@ -8,8 +8,9 @@ import (
 )
 
 func main() {
+	const SAFE_DISTANCE = 10000
 	input := util.ReadLines()
-	p1, p2 := Day6(input)
+	p1, p2 := Day6(input, SAFE_DISTANCE)
 
 	fmt.Printf("Part 1: %v\n", p1)
 	fmt.Printf("Part 2: %v\n", p2)
@@ -20,7 +21,7 @@ type point struct {
 	name string
 }
 
-func Day6(lines []string) (p1, p2 int) {
+func Day6(lines []string, safeDistance int) (p1, p2 int) {
 	points, width, height := getFieldPoints(lines)
 
 	// field[x][y]["name"]
@@ -55,7 +56,32 @@ func Day6(lines []string) (p1, p2 int) {
 		}
 	}
 
+	// Go through all places in the field and get total distance all points
+	for x := 0; x <= width; x++ {
+		for y := 0; y <= height; y++ {
+			safePoint := distanceToAllPointsLessThan(safeDistance, x, y, points)
+			if safePoint {
+				p2++
+			}
+		}
+	}
+
 	return
+}
+
+func distanceToAllPointsLessThan(lt, x, y int, points []point) bool {
+	totalDistance := 0
+	for _, p := range points {
+		dx := util.AbsInt(x - p.x)
+		dy := util.AbsInt(y - p.y)
+		totalDistance += (dx + dy)
+
+		if totalDistance >= lt {
+			return false
+		}
+	}
+
+	return true
 }
 
 func findInfiniteAreas(field [][]string) map[string]bool {

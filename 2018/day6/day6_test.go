@@ -4,7 +4,8 @@ import "testing"
 
 func TestDay6(t *testing.T) {
 	type args struct {
-		lines []string
+		lines        []string
+		safeDistance int
 	}
 	tests := []struct {
 		name   string
@@ -12,11 +13,11 @@ func TestDay6(t *testing.T) {
 		wantP1 int
 		wantP2 int
 	}{
-		{"Example", args{[]string{"1, 1", "1, 6", "8, 3", "3, 4", "5, 5", "8, 9",}}, 17, 0},
+		{"Example", args{[]string{"1, 1", "1, 6", "8, 3", "3, 4", "5, 5", "8, 9"}, 32}, 17, 16},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotP1, gotP2 := Day6(tt.args.lines)
+			gotP1, gotP2 := Day6(tt.args.lines, tt.args.safeDistance)
 			if gotP1 != tt.wantP1 {
 				t.Errorf("Day6() gotP1 = %v, want %v", gotP1, tt.wantP1)
 			}
