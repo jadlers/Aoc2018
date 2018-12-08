@@ -14,7 +14,7 @@ func TestDay8(t *testing.T) {
 		wantP1 int
 		wantP2 int
 	}{
-		{"Example", args{"2 3 0 3 10 11 12 1 1 0 1 99 2 1 1 2"}, 138, 0},
+		{"Example", args{"2 3 0 3 10 11 12 1 1 0 1 99 2 1 1 2"}, 138, 66},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

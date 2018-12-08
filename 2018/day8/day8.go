@@ -22,8 +22,8 @@ func Day8(line string) (p1, p2 int) {
 		parts = append(parts, i)
 	}
 
-	_, totalMetaData := nodeMetadata(parts, 0)
-	p1 = totalMetaData
+	_, p1 = nodeMetadata(parts, 0)
+	_, p2 = part2(parts, 0)
 
 	return
 }
@@ -39,6 +39,38 @@ func nodeMetadata(parts []int, total int) ([]int, int) {
 
 	for i := 0; i < numMetadata; i++ {
 		total += parts[i]
+	}
+
+	return parts[numMetadata:], total
+}
+
+func part2(parts []int, total int) ([]int, int) {
+	numChildren := parts[0]
+	numMetadata := parts[1]
+
+	parts = parts[2:] // Since we read numChild and numMetadata
+	if numChildren == 0 {
+		for i := 0; i < numChildren; i++ {
+			parts, total = part2(parts, total)
+		}
+
+		for i := 0; i < numMetadata; i++ {
+			total += parts[i]
+		}
+	} else {
+		childTotals := []int{}
+		for i := 0; i < numChildren; i++ {
+			var childVal int
+			parts, childVal = part2(parts, total)
+			childTotals = append(childTotals, childVal)
+		}
+
+		for i := 0; i < numMetadata; i++ {
+			childIdx := parts[i] - 1
+			if childIdx < len(childTotals) {
+				total += childTotals[childIdx]
+			}
+		}
 	}
 
 	return parts[numMetadata:], total
