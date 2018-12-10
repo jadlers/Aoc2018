@@ -1,6 +1,7 @@
 package main
 
 import (
+	"container/ring"
 	"fmt"
 )
 
@@ -13,32 +14,30 @@ func main() {
 	fmt.Printf("Part 2: %v\n", p2)
 }
 
-func Day9(numPlayers, lastMarbleValue int) (p1, p2 int) {
-	playerScores := map[int]int{}
+func Day9(numPlayers, lastMarbleValue int) (p1, p2 int64) {
+	extendedMarbleValue := int64(lastMarbleValue * 100)
+	playerScores := map[int]int64{}
 	curPlayer := 1
-	circle := []int{}
-	circle = append(circle, 0) // Add the first marble
-	curMarble := 0
+	circle := ring.New(1)
+	circle.Value = int64(0) // Add the first marble
 
-	for curVal := 1; curVal <= lastMarbleValue; curVal++ {
+	for curVal := int64(1); curVal <= extendedMarbleValue; curVal++ {
 		if curVal%23 != 0 {
-			nextMarbleIdx := ((curMarble + 1) % len(circle)) + 1
-			if nextMarbleIdx == len(circle) {
-				circle = append(circle, curVal)
-			} else {
-				snd := append([]int{curVal}, circle[nextMarbleIdx:]...)
-				circle = append(circle[:nextMarbleIdx], snd...)
-			}
-			curMarble = nextMarbleIdx
+			newElement := ring.New(1)
+			newElement.Value = curVal
+			// circle will be one after the newElement, aka one after currentValue
+			circle = circle.Link(newElement)
 		} else { // Special case where marble value is divisible by 23
 			playerScores[curPlayer] += curVal
-			removeMarbleIdx := (curMarble + len(circle) - 7) % len(circle)
-			playerScores[curPlayer] += circle[removeMarbleIdx]
-			circle = append(circle[:removeMarbleIdx], circle[removeMarbleIdx+1:]...)
-			curMarble = removeMarbleIdx
+			circle = circle.Move(-9) // Need to get one before remove and are already at next
+			removed := circle.Unlink(1)
+			playerScores[curPlayer] += removed.Value.(int64)
+			circle = circle.Move(2) // TODO: Correct?
 		}
 
-		// fmt.Printf("[%v]\t%v, curMarble[%v] = %v\n", curPlayer, circle, curMarble, circle[curMarble])
+		if curVal == int64(lastMarbleValue) {
+			p1 = maxScore(playerScores)
+		}
 
 		curPlayer++
 		if curPlayer%(numPlayers+1) == 0 {
@@ -46,13 +45,13 @@ func Day9(numPlayers, lastMarbleValue int) (p1, p2 int) {
 		}
 	}
 
-	p1 = maxScore(playerScores)
+	p2 = maxScore(playerScores)
 
 	return
 }
 
-func maxScore(scores map[int]int) int {
-	max := 0
+func maxScore(scores map[int]int64) int64 {
+	max := int64(0)
 	for _, val := range scores {
 		if val > max {
 			max = val

@@ -10,15 +10,15 @@ func TestDay9(t *testing.T) {
 	tests := []struct {
 		name   string
 		args   args
-		wantP1 int
-		wantP2 int
+		wantP1 int64
+		wantP2 int64
 	}{
-		{"Example 1", args{9, 25}, 32, 0},
-		{"Example 2", args{10, 1618}, 8317, 0},
-		{"Example 3", args{13, 7999}, 146373, 0},
-		{"Example 4", args{17, 1104}, 2764, 0},
-		{"Example 5", args{21, 6111}, 54718, 0},
-		{"Example 6", args{30, 5807}, 37305, 0},
+		{"Example 1", args{9, 25}, 32, 22563},
+		{"Example 2", args{10, 1618}, 8317, 74765078},
+		{"Example 3", args{13, 7999}, 146373, 1406506154},
+		{"Example 4", args{17, 1104}, 2764, 20548882},
+		{"Example 5", args{21, 6111}, 54718, 507583214},
+		{"Example 6", args{30, 5807}, 37305, 320997431},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
