@@ -10,8 +10,8 @@ func TestDay9(t *testing.T) {
 	tests := []struct {
 		name   string
 		args   args
-		wantP1 int64
-		wantP2 int64
+		wantP1 int
+		wantP2 int
 	}{
 		{"Example 1", args{9, 25}, 32, 22563},
 		{"Example 2", args{10, 1618}, 8317, 74765078},
