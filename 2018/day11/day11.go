@@ -13,7 +13,7 @@ func main() {
 	fmt.Printf("Part 2: %v\n", p2)
 }
 
-func Day11(serialNumber int) (p1 []int, p2 int) {
+func Day11(serialNumber int) (p1, p2 []int) {
 	grid := make([][]int, 300)
 	for i := range grid {
 		grid[i] = make([]int, 300)
@@ -36,26 +36,41 @@ func Day11(serialNumber int) (p1 []int, p2 int) {
 				p1[1] = y
 				maxVal = squareVal
 			}
-			if squareVal == 30 {
-				fmt.Printf("(%v, %v), maxval: %v\n", x, y, maxVal)
-			}
-			// fmt.Println(squareVal)
 		}
 	}
 
-
-
-	// For example 1
-	// if err := print(grid, 32, 44, 5, 5); err != nil {
-	// if err := print(grid, 165, 102, 5, 5); err != nil {
-	// 	fmt.Println(err)
-	// }
-	// For example 2
-	// if err := print(grid, 20, 60, 5, 5); err != nil {
-	// 	fmt.Println(err)
-	// }
+	maxVal = 0
+	p2 = []int{0, 0, 0}
+	for s := 4; s < 300; s++ {
+		for x := 0; x < 300-s; x++ {
+			for y := 0; y < 300-s; y++ {
+				squareVal := CalcSquare(grid, x, y, s)
+				if squareVal > maxVal {
+					p2[0] = x
+					p2[1] = y
+					p2[2] = s
+					maxVal = squareVal
+				}
+			}
+		}
+		fmt.Println(s)
+	}
 
 	return
+}
+
+func CalcSquare(grid [][]int, x, y, size int) (val int) {
+	if x+size >= 300 || y+size >= 300 {
+		return 0
+	}
+
+	for i := x; i < x+size; i++ {
+		for j := y; j < y+size; j++ {
+			val += grid[i][j]
+		}
+	}
+	return
+
 }
 
 func Calc3x3(grid [][]int, x, y int) (val int) {

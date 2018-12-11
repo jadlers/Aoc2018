@@ -13,10 +13,10 @@ func TestDay11(t *testing.T) {
 		name   string
 		args   args
 		wantP1 []int
-		wantP2 int
+		wantP2 []int
 	}{
-		{"Example 1", args{18}, []int{33, 45}, 0},
-		{"Example 2", args{42}, []int{21, 61}, 0},
+		{"Example 1", args{18}, []int{33, 45}, []int{90, 269, 16}},
+		{"Example 2", args{42}, []int{21, 61}, []int{232, 251, 12}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -24,7 +24,7 @@ func TestDay11(t *testing.T) {
 			if !reflect.DeepEqual(gotP1, tt.wantP1) {
 				t.Errorf("Day11() gotP1 = %v, want %v", gotP1, tt.wantP1)
 			}
-			if gotP2 != tt.wantP2 {
+			if !reflect.DeepEqual(gotP2, tt.wantP2) {
 				t.Errorf("Day11() gotP2 = %v, want %v", gotP2, tt.wantP2)
 			}
 		})
