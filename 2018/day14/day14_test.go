@@ -32,3 +32,26 @@ func TestDay14(t *testing.T) {
 		})
 	}
 }
+
+func TestDay14P2(t *testing.T) {
+	type args struct {
+		sequence []int
+	}
+	tests := []struct {
+		name string
+		args args
+		want int
+	}{
+		{"Example 1", args{[]int{5, 1, 5, 8, 9}}, 9},
+		{"Example 2", args{[]int{0, 1, 2, 4, 5}}, 5},
+		{"Example 3", args{[]int{9, 2, 5, 1, 0}}, 18},
+		{"Example 4", args{[]int{5, 9, 4, 1, 4}}, 2018},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := Day14P2(tt.args.sequence); got != tt.want {
+				t.Errorf("Day14P2() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
