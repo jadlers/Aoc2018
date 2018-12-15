@@ -10,7 +10,7 @@ func TestDay12(t *testing.T) {
 		name   string
 		args   args
 		wantP1 string
-		wantP2 int
+		wantP2 string
 	}{
 		{"Example 1", args{[]string{
 			"/->-\\",
@@ -19,7 +19,7 @@ func TestDay12(t *testing.T) {
 			"| | |  | v  |",
 			"\\-+-/  \\-+--/",
 			"  \\------/",
-		}}, "7,3", 0},
+		}}, "7,3", ""},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

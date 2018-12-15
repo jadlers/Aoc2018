@@ -24,7 +24,7 @@ type Cart struct {
 	nextIntersection string
 }
 
-func Day12(lines []string) (p1 string, p2 int) {
+func Day12(lines []string) (p1, p2 string) {
 	// Read input
 	carts := map[Position]Cart{}
 	tracks := make([][]string, len(lines)) // tracks[y][x]
@@ -48,96 +48,121 @@ func Day12(lines []string) (p1 string, p2 int) {
 		}
 	}
 
-	// PrintMap(tracks, carts)
+	for len(carts) > 1 {
+		_, carts, p1 = oneTick(tracks, carts)
+	}
 
-	crashFound := false
-	for i := 0; !crashFound; i++ {
-		// Sort carts on tracks
-		cartPositions := []Position{}
-		for position, _ := range carts {
-			cartPositions = append(cartPositions, position)
-		}
-		sort.SliceStable(cartPositions, func(i, j int) bool {
-			if cartPositions[i].x != cartPositions[j].x {
-				return cartPositions[i].x < cartPositions[j].x
-			}
-			return cartPositions[i].y < cartPositions[j].y
-		})
-
-		// fmt.Println(cartPositions)
-
-		// Move every cart one step
-		for _, pos := range cartPositions {
-			// fmt.Printf("Next cart at pos: %v: %v\n", pos, carts[pos])
-			curCart := carts[pos]
-			delete(carts, pos)
-			switch curCart.direction {
-			case ">":
-				nextTrack := tracks[pos.y][pos.x+1]
-				if hasCart(pos.x+1, pos.y, carts) {
-					p1 = fmt.Sprintf("%v,%v", pos.x+1, pos.y)
-					crashFound = true
-				} else if nextTrack == "\\" {
-					curCart.direction = "v"
-				} else if nextTrack == "/" {
-					curCart.direction = "^"
-				} else if nextTrack == "+" {
-					curCart.direction, curCart.nextIntersection = getIntersectionDirection(curCart.direction, curCart.nextIntersection)
-				} else if nextTrack != "-" {
-					fmt.Println("ERROR >, nextTrack:", nextTrack)
-				}
-				carts[Position{pos.x + 1, pos.y}] = curCart
-			case "v":
-				nextTrack := tracks[pos.y+1][pos.x]
-				if hasCart(pos.x, pos.y+1, carts) {
-					p1 = fmt.Sprintf("%v,%v", pos.x, pos.y+1)
-					crashFound = true
-				} else if nextTrack == "\\" {
-					curCart.direction = ">"
-				} else if nextTrack == "/" {
-					curCart.direction = "<"
-				} else if nextTrack == "+" {
-					curCart.direction, curCart.nextIntersection = getIntersectionDirection(curCart.direction, curCart.nextIntersection)
-				} else if nextTrack != "|" {
-					fmt.Println("ERROR v, next:", nextTrack)
-				}
-				carts[Position{pos.x, pos.y + 1}] = curCart
-			case "^":
-				nextTrack := tracks[pos.y-1][pos.x]
-				if hasCart(pos.x, pos.y-1, carts) {
-					p1 = fmt.Sprintf("%v,%v", pos.x, pos.y-1)
-					crashFound = true
-				} else if nextTrack == "\\" {
-					curCart.direction = "<"
-				} else if nextTrack == "/" {
-					curCart.direction = ">"
-				} else if nextTrack == "+" {
-					curCart.direction, curCart.nextIntersection = getIntersectionDirection(curCart.direction, curCart.nextIntersection)
-				} else if nextTrack != "|" {
-					fmt.Println("ERROR >, nextTrack:", nextTrack)
-				}
-				carts[Position{pos.x, pos.y - 1}] = curCart
-			case "<":
-				nextTrack := tracks[pos.y][pos.x-1]
-				if hasCart(pos.x-1, pos.y, carts) {
-					p1 = fmt.Sprintf("%v,%v", pos.x-1, pos.y)
-					crashFound = true
-				} else if nextTrack == "\\" {
-					curCart.direction = "^"
-				} else if nextTrack == "/" {
-					curCart.direction = "v"
-				} else if nextTrack == "+" {
-					curCart.direction, curCart.nextIntersection = getIntersectionDirection(curCart.direction, curCart.nextIntersection)
-				} else if nextTrack != "-" {
-					fmt.Println("ERROR >, nextTrack:", nextTrack)
-				}
-				carts[Position{pos.x - 1, pos.y}] = curCart
-			}
-		}
-		// fmt.Println(i)
+	for pos, _ := range carts {
+		p2 = fmt.Sprintf("%v,%v\n", pos.x, pos.y)
 	}
 
 	return
+}
+
+func oneTick(tracks [][]string, carts map[Position]Cart) (bool, map[Position]Cart, string) {
+	firstCrash := ""
+	crashFound := false
+	// Sort carts on tracks, only use the alive ones
+	cartPositions := []Position{}
+	for position := range carts {
+		cartPositions = append(cartPositions, position)
+	}
+	sort.SliceStable(cartPositions, func(i, j int) bool {
+		if cartPositions[i].x != cartPositions[j].x {
+			return cartPositions[i].x < cartPositions[j].x
+		}
+		return cartPositions[i].y < cartPositions[j].y
+	})
+
+	// fmt.Println(cartPositions)
+
+	// Move every cart one step
+	for _, pos := range cartPositions {
+		// fmt.Printf("Next cart at pos: %v: %v\n", pos, carts[pos])
+		curCart := carts[pos]
+		delete(carts, pos)
+		switch curCart.direction {
+		case ">":
+			nextTrack := tracks[pos.y][pos.x+1]
+			if hasCart(pos.x+1, pos.y, carts) {
+				firstCrash = fmt.Sprintf("%v,%v", pos.x+1, pos.y)
+				delete(carts, Position{pos.x + 1, pos.y})
+				crashFound = true
+				break
+			} else if nextTrack == "\\" {
+				curCart.direction = "v"
+			} else if nextTrack == "/" {
+				curCart.direction = "^"
+			} else if nextTrack == "+" {
+				curCart.direction, curCart.nextIntersection = getIntersectionDirection(curCart.direction, curCart.nextIntersection)
+			} else if nextTrack != "-" {
+				fmt.Println("ERROR >, nextTrack:", nextTrack)
+			}
+			if !hasCart(pos.x+1, pos.y, carts) {
+				carts[Position{pos.x + 1, pos.y}] = curCart
+			}
+		case "v":
+			nextTrack := tracks[pos.y+1][pos.x]
+			if hasCart(pos.x, pos.y+1, carts) {
+				firstCrash = fmt.Sprintf("%v,%v", pos.x, pos.y+1)
+				delete(carts, Position{pos.x, pos.y + 1})
+				crashFound = true
+				break
+			} else if nextTrack == "\\" {
+				curCart.direction = ">"
+			} else if nextTrack == "/" {
+				curCart.direction = "<"
+			} else if nextTrack == "+" {
+				curCart.direction, curCart.nextIntersection = getIntersectionDirection(curCart.direction, curCart.nextIntersection)
+			} else if nextTrack != "|" {
+				fmt.Println("ERROR v, next:", nextTrack)
+			}
+			if !hasCart(pos.x, pos.y+1, carts) {
+				carts[Position{pos.x, pos.y + 1}] = curCart
+			}
+		case "^":
+			nextTrack := tracks[pos.y-1][pos.x]
+			if hasCart(pos.x, pos.y-1, carts) {
+				firstCrash = fmt.Sprintf("%v,%v", pos.x, pos.y-1)
+				delete(carts, Position{pos.x, pos.y - 1})
+				crashFound = true
+				break
+			} else if nextTrack == "\\" {
+				curCart.direction = "<"
+			} else if nextTrack == "/" {
+				curCart.direction = ">"
+			} else if nextTrack == "+" {
+				curCart.direction, curCart.nextIntersection = getIntersectionDirection(curCart.direction, curCart.nextIntersection)
+			} else if nextTrack != "|" {
+				fmt.Println("ERROR >, nextTrack:", nextTrack)
+			}
+			if !hasCart(pos.x, pos.y-1, carts) {
+				carts[Position{pos.x, pos.y - 1}] = curCart
+			}
+		case "<":
+			nextTrack := tracks[pos.y][pos.x-1]
+			if hasCart(pos.x-1, pos.y, carts) {
+				firstCrash = fmt.Sprintf("%v,%v", pos.x-1, pos.y)
+				delete(carts, Position{pos.x - 1, pos.y})
+				crashFound = true
+				break
+			} else if nextTrack == "\\" {
+				curCart.direction = "^"
+			} else if nextTrack == "/" {
+				curCart.direction = "v"
+			} else if nextTrack == "+" {
+				curCart.direction, curCart.nextIntersection = getIntersectionDirection(curCart.direction, curCart.nextIntersection)
+			} else if nextTrack != "-" {
+				fmt.Println("ERROR >, nextTrack:", nextTrack)
+			}
+			if !hasCart(pos.x-1, pos.y, carts) {
+				carts[Position{pos.x - 1, pos.y}] = curCart
+			}
+		}
+	}
+	// fmt.Println(i)
+
+	return crashFound, carts, firstCrash
 }
 
 func hasCart(x, y int, carts map[Position]Cart) bool {
