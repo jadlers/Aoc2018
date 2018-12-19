@@ -48,17 +48,21 @@ func Day15(lines []string) (p1, p2 int) {
 	fmt.Println("Initial state")
 	printCave(walls, units)
 	tick := 0
-	for !winner(units) {
-		units = oneTick(walls, units)
-		// fmt.Printf("After %v rounds\n", tick)
+	winnerFound := false
+	for !winnerFound {
+		units, winnerFound = oneTick(walls, units)
 		// printCave(walls, units)
-		// fmt.Println()
-		tick++
+		if winnerFound {
+			p1 = tick * remainingHp(units)
+		} else {
+			tick++
+		}
 	}
-	fmt.Println("Ticks:", tick)
-	printCave(walls, units)
-	p1 = tick * remainingHp(units)
-	// // Guesses: 182207 (too high), 179220 (too high)
+	// printCave(walls, units)
+	// fmt.Printf("ticks: %v, remainingHp: %v\n", tick, remainingHp(units))
+	// fmt.Println()
+
+	// // Guesses: 182207 (too high), 179220 (too high), 176233 (too low)
 
 	return
 }
@@ -84,7 +88,7 @@ func remainingHp(units map[Position]Unit) (total int) {
 	return
 }
 
-func oneTick(walls [][]bool, units map[Position]Unit) map[Position]Unit {
+func oneTick(walls [][]bool, units map[Position]Unit) (map[Position]Unit, bool) {
 	// Sort in traversing order
 	order := []Position{}
 	for pos := range units {
@@ -98,14 +102,20 @@ func oneTick(walls [][]bool, units map[Position]Unit) map[Position]Unit {
 		return order[i].c < order[j].c
 	})
 
+	visited := map[Position]bool{}
+	// Keep track of the ones visited, since other units may move onto a position
+	// where there previously was an unit that died. That unit will then get to
+	// play twic
+
 	for _, curPosition := range order {
 		// printCave(walls, units)
-		if curUnit, exists := units[curPosition]; exists {
+		if _, alreadyVisited := visited[curPosition]; alreadyVisited {
+			// Noop
+			// fmt.Println("alreadyVisited:", curPosition)
+		} else if curUnit, exists := units[curPosition]; exists {
 			if foundTarget, goTowards := findClosestOpponent(curPosition, walls, units); foundTarget {
-				// findClosestOpponent works
 				if !curPosition.inAttackRange(goTowards) { // Move towards being in attack range
 					// fmt.Printf("at %v will move towards: %v\n", curPosition, goTowards)
-					// fmt.Printf("%v can't attack %v\n", curPosition, goTowards)
 					nextPosition := getMovePosition(curPosition, goTowards, walls, units)
 					delete(units, curPosition)
 					curPosition = nextPosition
@@ -119,9 +129,7 @@ func oneTick(walls [][]bool, units map[Position]Unit) map[Position]Unit {
 					directions := []string{"up", "left", "right", "down"}
 					for _, dir := range directions {
 						adjacentPos := curPosition.move(dir)
-						// fmt.Printf("adjacentPos: %v, with unit %v\n", adjacentPos, units[adjacentPos])
 						if adjacentUnit, exists := units[adjacentPos]; exists && curUnit.isOpponent(adjacentUnit) {
-							// fmt.Printf("adjacentPos: %v, with unit %v\n", adjacentPos, units[adjacentPos])
 							if adjacentUnit.hp < target.hp {
 								target = adjacentUnit
 								targetPos = adjacentPos
@@ -129,53 +137,76 @@ func oneTick(walls [][]bool, units map[Position]Unit) map[Position]Unit {
 						}
 					}
 
-					// fmt.Printf("%v attacking %v at %v\n", curPosition, target, targetPos)
 					target.hp -= curUnit.damage
 					if target.hp <= 0 {
 						delete(units, targetPos)
+						visited[targetPos] = true
 					} else {
 						units[targetPos] = target
 					}
 				}
-			} else { // Unit can't move
-				units[curPosition] = curUnit
+			} else if winner(units) { // Unit can't move, or all opponents are dead
+				// fmt.Printf("No more units for %v at %v to attack, victory\n", curUnit, curPosition)
+				return units, true
 			}
 		}
+		visited[curPosition] = true
 	}
-	return units
+	victory := false
+	return units, victory
 }
 
 // Finds the position of the closest opponent
 func findClosestOpponent(start Position, walls [][]bool, units map[Position]Unit) (foundTarget bool, goTowards Position) {
-	queued := map[Position]bool{} // Map of all positions covered
+	queued := map[Position]int{} // Map of all positions covered, value is distance
 	searchingUnit := units[start]
 	q := list.New()
 	q.PushBack(start)
-	queued[start] = true
+	queued[start] = 0
+	targets := []Position{}
 
 	// fmt.Printf("Unit at %v looking for target\n", start)
+	firstTargetDistance := -1
 	directions := []string{"up", "left", "right", "down"} // traversing order
 	for cur := q.Front(); cur != nil; cur = cur.Next() {
 		curPos := cur.Value.(Position)
 		// fmt.Printf("Currently at (%v, %v)\n", curPos.r, curPos.c)
 
-		for _, dir := range directions {
-			adjacentPos := curPos.move(dir)
-			// fmt.Printf("Going %v to %v\n", dir, adjacentPos)
-			// Check if any pos in range is opponent
-			if unit, exists := units[adjacentPos]; exists {
-				if unit.isOpponent(searchingUnit) {
-					foundTarget = true
-					goTowards = adjacentPos
-					// fmt.Println("Going to:", adjacentPos)
-					return
+		// Just look through up until the first distance found
+		if firstTargetDistance < 0 || firstTargetDistance == queued[curPos]+1 {
+			for _, dir := range directions {
+				adjacentPos := curPos.move(dir)
+				if _, adjacentAlreadyQueued := queued[adjacentPos]; !adjacentAlreadyQueued {
+					queued[adjacentPos] = queued[curPos] + 1
+					// Check if any pos in range is opponent
+					if unit, exists := units[adjacentPos]; exists {
+						// fmt.Printf("Going %v to %v hits unit %v\n", dir, adjacentPos, unit)
+						if unit.isOpponent(searchingUnit) {
+							firstTargetDistance = queued[curPos] + 1 // Distance to target found
+							targets = append(targets, adjacentPos)
+							// fmt.Println("Going to:", adjacentPos)
+							// return
+						}
+						// Check if the position can be walked to
+					} else if !adjacentAlreadyQueued && !walls[adjacentPos.r][adjacentPos.c] {
+						// fmt.Printf("Going %v to empty location %v\n", dir, adjacentPos)
+						q.PushBack(adjacentPos)
+					}
 				}
-				// Check if the position can be walked to
-			} else if !queued[adjacentPos] && !walls[adjacentPos.r][adjacentPos.c] {
-				q.PushBack(adjacentPos)
-				queued[adjacentPos] = true
 			}
 		}
+	}
+
+	if len(targets) > 0 {
+		foundTarget = true
+
+		sort.SliceStable(targets, func(i, j int) bool {
+			if targets[i].r != targets[j].r {
+				return targets[i].r < targets[j].r
+			}
+			return targets[i].c < targets[j].c
+		})
+		goTowards = targets[0]
 	}
 
 	return

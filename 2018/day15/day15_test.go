@@ -12,13 +12,6 @@ func TestDay15(t *testing.T) {
 		wantP1 int
 		wantP2 int
 	}{
-		// {"moving example", args{[]string{
-		// 	"#######",
-		// 	"#E..G.#",
-		// 	"#...#.#",
-		// 	"#.G.#G#",
-		// 	"#######",
-		// }}, 1, 0},
 		{"Reddit 1", args{[]string{ // Should take 67 rounds
 			"####",
 			"##E#",
@@ -34,6 +27,13 @@ func TestDay15(t *testing.T) {
 			"#.E##",
 			"#####",
 		}}, 13987, 0},
+		{"Reddit 3", args{[]string{
+			"#######",
+			"#.E..G#",
+			"#.#####",
+			"#G#####",
+			"#######",
+		}}, 10234, 0},
 		{"Example 1", args{[]string{ // Should take 47 rounds
 			"#######",
 			"#.G...#",
@@ -61,6 +61,35 @@ func TestDay15(t *testing.T) {
 			"#..E#.#",
 			"#######",
 		}}, 39514, 0},
+		{"Example 4", args{[]string{ // Should take 35 rounds
+			"#######",
+			"#E.G#.#",
+			"#.#G..#",
+			"#G.#.G#",
+			"#G..#.#",
+			"#...E.#",
+			"#######",
+		}}, 27755, 0},
+		{"Example 5", args{[]string{ // Should take 54 rounds
+			"#######",
+			"#.E...#",
+			"#.#..G#",
+			"#.###.#",
+			"#E#G#G#",
+			"#...#G#",
+			"#######",
+		}}, 28944, 0},
+		{"Example 5", args{[]string{ // Should take 20 rounds
+			"#########",
+			"#G......#",
+			"#.E.#...#",
+			"#..##..G#",
+			"#...##..#",
+			"#...#...#",
+			"#.G...G.#",
+			"#.....G.#",
+			"#########",
+		}}, 18740, 0},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
