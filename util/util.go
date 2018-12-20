@@ -17,6 +17,19 @@ func ReadLines() []string {
 	return lines
 }
 
+func ReadLinesFromFile(path string) []string {
+	if file, err := os.Open(path); err == nil {
+		var lines []string
+		scanner := bufio.NewScanner(file)
+		for scanner.Scan() {
+			lines = append(lines, scanner.Text())
+		}
+		return lines
+	} else {
+		panic(err)
+	}
+}
+
 func StringSliceToInt(from []string) []int {
 	to := make([]int, len(from))
 	for i, val := range from {
