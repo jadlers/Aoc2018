@@ -1,6 +1,7 @@
 package main
 
 import "testing"
+import "reflect"
 
 func TestDay16_p1(t *testing.T) {
 	type args struct {
@@ -22,24 +23,24 @@ func TestDay16_p1(t *testing.T) {
 	}
 }
 
-func TestNumEqualOps(t *testing.T) {
+func TestEqualOps(t *testing.T) {
 	type args struct {
 		dump Dump
 	}
 	tests := []struct {
 		name    string
 		args    args
-		wantRes int
+		wantRes []int
 	}{
 		{"Example 1", args{Dump{
 			[4]int{3, 2, 1, 1},
 			[]int{9, 2, 1, 2},
 			[4]int{3, 2, 2, 1},
-		}}, 3},
+		}}, []int{0, 3, 8}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if gotRes := NumEqualOps(tt.args.dump); gotRes != tt.wantRes {
+			if gotRes := EqualOps(tt.args.dump); !reflect.DeepEqual(gotRes, tt.wantRes) {
 				t.Errorf("NumEqualOps() = %v, want %v", gotRes, tt.wantRes)
 			}
 		})
