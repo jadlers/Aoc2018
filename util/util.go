@@ -57,3 +57,12 @@ func AbsInt(no int) int {
 	}
 	return no
 }
+
+func IncludesInt(val int, slice []int) bool {
+	for _, cur := range slice {
+		if val == cur {
+			return true
+		}
+	}
+	return false
+}
