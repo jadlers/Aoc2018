@@ -34,19 +34,22 @@ func (m *machine) mul() bool {
 }
 
 // Run executes the instructions in memory until the exit code
-func (m *machine) Run() {
-	for {
+func (m *machine) Run() (ok bool) {
+	ok = true
+	for ok {
 		op := m.memory[m.ip]
 
 		switch op {
 		case 1:
-			m.add()
+			ok = m.add()
 		case 2:
-			m.mul()
+			ok = m.mul()
 		case 99:
 			return
 		}
 	}
+
+	return false
 }
 
 func (m *machine) safeToAccessMemory(start, end int) bool {
